@@ -13,7 +13,7 @@ except KeyError:
     st.stop()
 
 # 최신 모델 설정
-MODEL_NAME = 'gemini-3.5-flash’
+MODEL_NAME = 'gemini-3.5-flash'
 
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
