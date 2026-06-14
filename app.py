@@ -14,8 +14,8 @@ except KeyError:
     st.error("앗! API 키 설정이 빠져있습니다. Streamlit Secrets 설정을 확인해주세요.")
     st.stop()
     
-# 최신 모델 설정 (공식 명칭으로 통일)
-MODEL_NAME = 'gemini-1.5-flash'
+# 최신 모델 설정 (구글 AI 스튜디오 사용 버전)
+MODEL_NAME = 'gemini-3.1-pro-preview'
     
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
