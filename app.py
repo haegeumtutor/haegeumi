@@ -33,7 +33,7 @@ module_stage = st.sidebar.radio(
 # ⭐ 핵심 공통 함수: 학생 오디오 + 참조 오디오 함께 보내기
 # ==========================================
 def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_message, reference_files=None):
-    model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt)
+    model = genai.GenerativeModel(model_name='gemini-3-flash-preview', system_instruction=system_prompt)
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
         tmp_file.write(audio_file_bytes)
