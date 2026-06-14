@@ -2,12 +2,11 @@ import streamlit as st
 import google.generativeai as genai
 import tempfile
 import os
-from audiorecorder import audiorecorder # 🎤 녹음기 부품 불러오기
 
 # ==========================================
 # 1. 기본 설정 및 API 키 불러오기
 # ==========================================
-st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="🎵", layout="wide")
+st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="", layout="wide")
 
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -18,7 +17,7 @@ except KeyError:
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
 # ==========================================
-st.sidebar.title("🎵 해금 학습 메뉴")
+st.sidebar.title("해금 학습 메뉴")
 st.sidebar.write("자신의 진도에 맞춰 단계를 선택해주세요.")
 module_stage = st.sidebar.radio(
     "진행할 단계:",
@@ -36,14 +35,12 @@ module_stage = st.sidebar.radio(
 def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_message, reference_files=None):
     model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt)
     
-    # 1. 학생 음원 임시 저장 및 업로드
     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
         tmp_file.write(audio_file_bytes)
         tmp_file_path = tmp_file.name
         
     student_audio = genai.upload_file(path=tmp_file_path)
     
-    # 2. AI에게 보낼 데이터 꾸러미 만들기
     contents = []
     
     if reference_files:
@@ -64,22 +61,21 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
     os.remove(tmp_file_path)
     return response.text
 
-# 🎤 오디오 입력을 받는 공통 UI (녹음 or 업로드)
+# 🎤 스트림릿 최신형 '기본 내장 녹음기' 적용 UI
 def get_audio_input(label):
     st.write(label)
     
-    # 탭으로 녹음과 업로드를 나눠서 깔끔하게 보여줍니다.
     tab1, tab2 = st.tabs(["🎙️ 바로 녹음하기", "📁 파일 업로드"])
     
     audio_bytes = None
-    file_ext = "wav" # 녹음 기본 확장자
+    file_ext = "wav" 
     
     with tab1:
-        st.info("마이크 아이콘을 누르면 녹음이 시작되고, 다시 누르면 멈춥니다.")
-        audio = audiorecorder("🎤 녹음 시작", "⏹️ 녹음 중지 (클릭)")
-        if len(audio) > 0:
-            st.audio(audio.export().read()) # 녹음된 소리 미리 듣기
-            audio_bytes = audio.export().read()
+        st.info("마이크 버튼을 눌러 녹음을 시작하세요.")
+        # 스트림릿 최신 내장 오디오 레코더 함수 사용 (오류 0%)
+        audio_record = st.audio_input("내 연주 녹음하기")
+        if audio_record:
+            audio_bytes = audio_record.getvalue()
             
     with tab2:
         uploaded_file = st.file_uploader("녹음 파일을 올려주세요 (mp3, wav, m4a 등)", type=['mp3', 'wav', 'm4a'])
@@ -96,8 +92,8 @@ def get_audio_input(label):
 
 # ----------------- 1단계 -----------------
 if module_stage == "1단계: 조율사 해그미 (준비)":
-    st.title(" 1단계: 조율사 해그미")
-    st.info("육자배기토리 시김새 학습을 시작하기 전, 육자배기토리의 기본음을 정확한 음정으로 소리 내 보세요!.")
+    st.title("1단계: 조율사 해그미")
+    st.info("육자배기토리 시김새 학습을 시작하기 전, 육자배기토리의 기본음을 정확하게 소리 내 보세요.")
     
     system_prompt_1 = """
 [역할 및 목적]
@@ -141,7 +137,6 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
     
     user_text = st.text_input("어떤 음을 연습했나요? (예: 미 소리 들어주세요)")
     
-    # 🎤 녹음기 적용
     audio_bytes, file_ext = get_audio_input("해금 조율 소리를 녹음하거나 업로드해주세요.")
     
     if audio_bytes and st.button("해그미에게 피드백 받기"):
@@ -153,8 +148,8 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
 
 # ----------------- 2단계 -----------------
 elif module_stage == "2단계: 시김새 해그미 (기초)":
-    st.title(" 2단계: 시김새 해그미")
-    st.info("육자배기토리의 시김새인 떠는 음(미), 평으로 내는 음(라), 꺾는 음(도시)을 연습하는 단계입니다.")
+    st.title("2단계: 시김새 해그미")
+    st.info("육자배기토리의 시김새-떠는 음(미), 평으로 내는 음(라), 꺾는 음(도시)-을 해금으로 연습해 보세요.")
     
     system_prompt_2 = """
 [Role]
@@ -226,7 +221,6 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
     
     user_text = st.text_input("어떤 시김새를 연습했나요? (예: 떠는 음 미)")
     
-    # 🎤 녹음기 적용
     audio_bytes, file_ext = get_audio_input("연습한 시김새 소리를 녹음하거나 업로드해주세요.")
     
     if audio_bytes and st.button("해그미에게 피드백 받기"):
@@ -238,8 +232,8 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
 
 # ----------------- 3단계 -----------------
 elif module_stage == "3단계: 진도아리랑 해그미 (실전)":
-    st.title(" 3단계: 진도아리랑 해그미")
-    st.info("육자배기토리의 시김새 표현을 살려 진도아리랑을 연주해보는 단계입니다.")
+    st.title("3단계: 진도아리랑 해그미")
+    st.info("육자배기토리의 시김새를 살려 진도아리랑을 해금으로 멋지게 연주해 보세요.")
     
     system_prompt_3 = """
 [Role]
@@ -285,7 +279,6 @@ AB파트-아(떠는 음) 리(평 음) 아(떠는 음) 리(평 음) 랑(평음)
     
     ref_files_3 = [f"Jindo1-{i}.m4a" for i in range(1, 6)] + [f"Jindo2-{i}.m4a" for i in range(1, 6)]
     
-    # 🎤 녹음기 적용
     audio_bytes, file_ext = get_audio_input("나의 실전 연주 소리를 녹음하거나 업로드해주세요.")
     
     if audio_bytes and st.button("전문가 해그미에게 피드백 받기"):
