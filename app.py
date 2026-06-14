@@ -33,36 +33,51 @@ module_stage = st.sidebar.radio(
 )
 
 # ==========================================
-# ⭐ 핵심 공통 함수: 학생 오디오 + 참조 오디오 함께 보내기
+# ⭐ 핵심 공통 함수: 학생 오디오 + 참조 오디오 함께 보내기 (오류 없는 직접 전송 방식)
 # ==========================================
 def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_message, reference_files=None):
     model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt)
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
-        tmp_file.write(audio_file_bytes)
-        tmp_file_path = tmp_file.name
+    # 확장자에 따른 정확한 MIME 타입 설정 함수
+    def get_mime_type(ext):
+        ext = ext.lower()
+        if ext in ['m4a', 'mp4']: return 'audio/mp4'
+        elif ext in ['mp3']: return 'audio/mpeg'
+        elif ext in ['wav']: return 'audio/wav'
+        else: return f'audio/{ext}'
         
-    student_audio = genai.upload_file(path=tmp_file_path)
-    
     contents = []
     
+    # 1. 선생님 참조 음원 넣기 (파일 업로드 생략, 직접 읽기)
     if reference_files:
         contents.append("다음은 선생님이 직접 녹음한 전문가의 기준(참조) 음원들입니다. 파일명을 확인하고 이 소리들의 파형과 주파수를 평가 기준으로 삼아주세요.")
         for ref_file in reference_files:
             if os.path.exists(ref_file):
-                uploaded_ref = genai.upload_file(path=ref_file)
+                with open(ref_file, "rb") as f:
+                    ref_bytes = f.read()
+                
+                ref_ext = ref_file.split('.')[-1]
                 contents.append(f"[{ref_file}]")
-                contents.append(uploaded_ref)
+                contents.append({
+                    "mime_type": get_mime_type(ref_ext),
+                    "data": ref_bytes
+                })
             else:
                 st.warning(f"⚠️ 참조 파일 '{ref_file}'을 찾을 수 없습니다. GitHub에 함께 업로드했는지 확인해주세요.")
                 
+    # 2. 학생 연주 음원 넣기 (마찬가지로 직접 전송)
     contents.append("다음은 학생의 연주 음원입니다.")
-    contents.append(student_audio)
+    contents.append({
+        "mime_type": get_mime_type(file_extension),
+        "data": audio_file_bytes
+    })
     contents.append(user_message)
     
+    # 3. AI 분석 요청 (upload_file 과정이 없으므로 HttpError 발생 불가!)
     response = model.generate_content(contents)
-    os.remove(tmp_file_path)
+    
     return response.text
+
 
 # 🎤 스트림릿 최신형 '기본 내장 녹음기' 적용 UI
 def get_audio_input(label):
