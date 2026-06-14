@@ -28,19 +28,19 @@ module_stage = st.sidebar.radio(
         "3단계: 진도아리랑 해그미 (실전)",
         "4단계: 성찰 해그미 (마무리)"
     ]
-)# ==========================================
+# ==========================================
 # ⭐ 핵심 공통 함수: 학생 오디오 + 참조 오디오 함께 보내기
 # ==========================================
 def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_message, reference_files=None):
-   model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt)
+    model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt)
     
-   with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
         tmp_file.write(audio_file_bytes)
         tmp_file_path = tmp_file.name
-       
-   student_audio = genai.upload_file(path=tmp_file_path)
+        
+    student_audio = genai.upload_file(path=tmp_file_path)
     
-   contents = []
+    contents = []
     
     if reference_files:
         contents.append("다음은 선생님이 직접 녹음한 전문가의 기준(참조) 음원들입니다. 파일명을 확인하고 이 소리들의 파형과 주파수를 평가 기준으로 삼아주세요.")
@@ -59,6 +59,7 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
     response = model.generate_content(contents)
     os.remove(tmp_file_path)
     return response.text
+    
 # 🎤 스트림릿 최신형 '기본 내장 녹음기' 적용 UI
 def get_audio_input(label):
     st.write(label)
