@@ -2,14 +2,13 @@ import streamlit as st
 import google.generativeai as genai
 import tempfile
 import os
+from audiorecorder import audiorecorder # 🎤 녹음기 부품 불러오기
 
 # ==========================================
 # 1. 기본 설정 및 API 키 불러오기
 # ==========================================
-# 오타 수정: page_icon 추가 및 쉼표 정리
-st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="", layout="wide")
+st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="🎵", layout="wide")
 
-# API 키는 Streamlit Cloud의 Secrets에서 안전하게 불러옵니다.
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 except KeyError:
@@ -19,7 +18,7 @@ except KeyError:
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
 # ==========================================
-st.sidebar.title(" 해금 학습 메뉴")
+st.sidebar.title("🎵 해금 학습 메뉴")
 st.sidebar.write("자신의 진도에 맞춰 단계를 선택해주세요.")
 module_stage = st.sidebar.radio(
     "진행할 단계:",
@@ -47,28 +46,49 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
     # 2. AI에게 보낼 데이터 꾸러미 만들기
     contents = []
     
-    # 참조 음원(기준 소리)이 리스트로 전달되었다면 모두 업로드해서 첨부
     if reference_files:
         contents.append("다음은 선생님이 직접 녹음한 전문가의 기준(참조) 음원들입니다. 파일명을 확인하고 이 소리들의 파형과 주파수를 평가 기준으로 삼아주세요.")
         for ref_file in reference_files:
             if os.path.exists(ref_file):
                 uploaded_ref = genai.upload_file(path=ref_file)
-                contents.append(f"[{ref_file}]") # AI가 파일명을 인식하도록 텍스트 추가
+                contents.append(f"[{ref_file}]")
                 contents.append(uploaded_ref)
             else:
                 st.warning(f"⚠️ 참조 파일 '{ref_file}'을 찾을 수 없습니다. GitHub에 함께 업로드했는지 확인해주세요.")
                 
-    # 학생 연주 첨부
     contents.append("다음은 학생의 연주 음원입니다.")
     contents.append(student_audio)
     contents.append(user_message)
     
-    # 3. AI에게 분석 요청
     response = model.generate_content(contents)
-    
-    # 찌꺼기 파일 삭제
     os.remove(tmp_file_path)
     return response.text
+
+# 🎤 오디오 입력을 받는 공통 UI (녹음 or 업로드)
+def get_audio_input(label):
+    st.write(label)
+    
+    # 탭으로 녹음과 업로드를 나눠서 깔끔하게 보여줍니다.
+    tab1, tab2 = st.tabs(["🎙️ 바로 녹음하기", "📁 파일 업로드"])
+    
+    audio_bytes = None
+    file_ext = "wav" # 녹음 기본 확장자
+    
+    with tab1:
+        st.info("마이크 아이콘을 누르면 녹음이 시작되고, 다시 누르면 멈춥니다.")
+        audio = audiorecorder("🎤 녹음 시작", "⏹️ 녹음 중지 (클릭)")
+        if len(audio) > 0:
+            st.audio(audio.export().read()) # 녹음된 소리 미리 듣기
+            audio_bytes = audio.export().read()
+            
+    with tab2:
+        uploaded_file = st.file_uploader("녹음 파일을 올려주세요 (mp3, wav, m4a 등)", type=['mp3', 'wav', 'm4a'])
+        if uploaded_file is not None:
+            st.audio(uploaded_file)
+            audio_bytes = uploaded_file.getvalue()
+            file_ext = uploaded_file.name.split('.')[-1]
+            
+    return audio_bytes, file_ext
 
 # ==========================================
 # 3. 각 단계별 화면 및 프롬프트 설정
@@ -77,7 +97,7 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
 # ----------------- 1단계 -----------------
 if module_stage == "1단계: 조율사 해그미 (준비)":
     st.title(" 1단계: 조율사 해그미")
-    st.info("육자배기토리 시김새 학습을 시작하기 전, 악기 조율과 연주 준비를 해봅시다.")
+    st.info("육자배기토리 시김새 학습을 시작하기 전, 육자배기토리의 기본음을 정확한 음정으로 소리 내 보세요!.")
     
     system_prompt_1 = """
 [역할 및 목적]
@@ -117,23 +137,24 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
 학생이 미, 라, 도 3음을 모두 통과하면 "조율이 완벽하게 끝났습니다! 이제 다음 단계인 '시김새 해그미'로 넘어갈 준비가 되었습니다!"라고 안내합니다.
     """
     
-    # ⭐ 1단계 참조 음원 리스트 (깃허브에 올릴 파일명과 똑같아야 합니다)
     ref_files_1 = ["Yukja_reference_Mi.m4a", "Yukja_reference_La.m4a", "Yukja_reference_Do.m4a"]
     
     user_text = st.text_input("어떤 음을 연습했나요? (예: 미 소리 들어주세요)")
-    audio_input = st.file_uploader("해금 조율 소리를 업로드해주세요.", type=['mp3', 'wav', 'm4a'])
     
-    if audio_input and st.button("해그미에게 피드백 받기"):
+    # 🎤 녹음기 적용
+    audio_bytes, file_ext = get_audio_input("해금 조율 소리를 녹음하거나 업로드해주세요.")
+    
+    if audio_bytes and st.button("해그미에게 피드백 받기"):
         with st.spinner("해그미가 소리를 분석하고 있습니다..."):
             message = user_text if user_text else "내 해금 소리를 듣고 피드백을 해줘."
-            result = get_ai_feedback(system_prompt_1, audio_input.getvalue(), audio_input.name.split('.')[-1], message, reference_files=ref_files_1)
+            result = get_ai_feedback(system_prompt_1, audio_bytes, file_ext, message, reference_files=ref_files_1)
             st.success("분석 완료!")
             st.write(result)
 
 # ----------------- 2단계 -----------------
 elif module_stage == "2단계: 시김새 해그미 (기초)":
     st.title(" 2단계: 시김새 해그미")
-    st.info("떠는 음, 평으로 내는 음 등 기초 시김새를 들어보고 판별하는 단계입니다.")
+    st.info("육자배기토리의 시김새인 떠는 음(미), 평으로 내는 음(라), 꺾는 음(도시)을 연습하는 단계입니다.")
     
     system_prompt_2 = """
 [Role]
@@ -201,23 +222,24 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
  [ 목표: 굵고 깊은 파도 모양 ]
     """
     
-    # ⭐ 2단계 참조 음원 리스트
     ref_files_2 = ["Yukja_sigimsae_Mi.m4a", "Yukja_sigimsae_La.m4a", "Yukja_sigimsae_Dosi.m4a"]
     
     user_text = st.text_input("어떤 시김새를 연습했나요? (예: 떠는 음 미)")
-    audio_input = st.file_uploader("연습한 시김새 소리를 업로드해주세요.", type=['mp3', 'wav', 'm4a'])
     
-    if audio_input and st.button("해그미에게 피드백 받기"):
+    # 🎤 녹음기 적용
+    audio_bytes, file_ext = get_audio_input("연습한 시김새 소리를 녹음하거나 업로드해주세요.")
+    
+    if audio_bytes and st.button("해그미에게 피드백 받기"):
         with st.spinner("해그미가 시김새를 듣고 있습니다..."):
             message = user_text if user_text else "이 시김새가 어떤 종류인지, 잘 표현되었는지 알려줘."
-            result = get_ai_feedback(system_prompt_2, audio_input.getvalue(), audio_input.name.split('.')[-1], message, reference_files=ref_files_2)
+            result = get_ai_feedback(system_prompt_2, audio_bytes, file_ext, message, reference_files=ref_files_2)
             st.success("분석 완료!")
             st.write(result)
 
 # ----------------- 3단계 -----------------
 elif module_stage == "3단계: 진도아리랑 해그미 (실전)":
     st.title(" 3단계: 진도아리랑 해그미")
-    st.info("실제 연주를 통해 시김새를 전문가의 기준과 비교하며 교정합니다.")
+    st.info("육자배기토리의 시김새 표현을 살려 진도아리랑을 연주해보는 단계입니다.")
     
     system_prompt_3 = """
 [Role]
@@ -261,13 +283,14 @@ AB파트-아(떠는 음) 리(평 음) 아(떠는 음) 리(평 음) 랑(평음)
 아(평음) 라(평음) 리(평음)가(꺾는 음) 났(꺾는 음) 네(평음)
     """
     
-    # ⭐ 3단계 참조 음원 리스트 (파이썬 리스트 컴프리헨션으로 10개 파일 자동 생성)
     ref_files_3 = [f"Jindo1-{i}.m4a" for i in range(1, 6)] + [f"Jindo2-{i}.m4a" for i in range(1, 6)]
     
-    audio_input = st.file_uploader("나의 실전 연주 소리를 업로드해주세요.", type=['mp3', 'wav', 'm4a'])
-    if audio_input and st.button("전문가 해그미에게 피드백 받기"):
+    # 🎤 녹음기 적용
+    audio_bytes, file_ext = get_audio_input("나의 실전 연주 소리를 녹음하거나 업로드해주세요.")
+    
+    if audio_bytes and st.button("전문가 해그미에게 피드백 받기"):
         with st.spinner("주파수와 파형을 기반으로 정교하게 분석 중입니다..."):
-            result = get_ai_feedback(system_prompt_3, audio_input.getvalue(), audio_input.name.split('.')[-1], "내 연주에서 시김새가 전문가 기준에 맞게 잘 표현되었는지 피드백해줘.", reference_files=ref_files_3)
+            result = get_ai_feedback(system_prompt_3, audio_bytes, file_ext, "내 연주에서 시김새가 전문가 기준에 맞게 잘 표현되었는지 피드백해줘.", reference_files=ref_files_3)
             st.success("분석 완료!")
             st.write(result)
 
@@ -295,7 +318,7 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 -오늘 연습한 세 가지 시김새(떠는 음, 평음, 꺾는 음) 중에서, 육자배기토리의 느낌을 살리는 데 가장 중요하다고 생각한 시김새는 무엇이었나요? 
 -학생의 대답에 맞춰 해당 시김새의 음악적 원리를 한 번 더 짚어주며 칭찬합니다.
 -학생의 노력에 전통 음악(국악)의 가치를 살짝 얹어서 칭찬해 주세요.
--예시: "방금 낸 그 '꺾는 음' 하나를 위해 들인 노력이, 우리 남도 민요의 멋을 수백 년 뒤로 이어가는 아주 멋진 첫걸음이랍니다. 
+-예시: "방금 낸 그 '꺾는 음' 하나를 위해 들인 노력이, 우리 남도 민요의 멋을 수백 신 뒤로 이어가는 아주 멋진 첫걸음이랍니다. 
 -학생들이 '육자배기토리'의 음악적 특징(떠는 음, 평음, 꺾는 음)이라는 핵심 개념을 잊지 않도록 돕습니다.
 -단순히 "잘했다"가 아니라, "어떤 음의 특징을 살리려 노력했는지" 구체적인 음악용어를 사용하여 대화합니다.
   
@@ -330,15 +353,12 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 "포기하지 않고 끝까지 자신의 소리에 귀 기울인 당신이 최고입니다!"
     """
     
-    # 💡 Tip: 4단계는 대화형(Chat)으로 설계하셨으나, 현재 코드는 텍스트를 한 번에 받아 분석하는 구조입니다. 
-    # 학생이 연습 소감부터 깨달은 점까지 종합적으로 적어 내면, AI가 이를 한 번에 읽고 뱃지를 수여하는 방식으로 아주 잘 작동합니다.
     user_reflection = st.text_area("오늘 연습하면서 가장 어려웠던 부분이나 새롭게 깨달은 점을 자유롭게 적어주세요.", height=150)
     
     if user_reflection and st.button("마음 지도 및 뱃지 받기"):
         with st.spinner("해그미가 학생의 성찰을 읽고 마음 지도를 그리고 있습니다..."):
             model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt_4)
-            # 4단계는 음성 파일 없이 텍스트만 보내므로 공통 함수 대신 직접 호출합니다.
             response = model.generate_content(user_reflection)
-            st.balloons() # 축하 풍선 효과!
+            st.balloons() 
             st.success("성찰 완료!")
             st.write(response.text)
