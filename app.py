@@ -37,10 +37,10 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
         tmp_file.write(audio_file_bytes)
         tmp_file_path = tmp_file.name
-        
-    student_audio = genai.upload_file(path=tmp_file_path)
+       
+   student_audio = genai.upload_file(path=tmp_file_path)
     
-    contents = []
+   contents = []
     
     if reference_files:
         contents.append("다음은 선생님이 직접 녹음한 전문가의 기준(참조) 음원들입니다. 파일명을 확인하고 이 소리들의 파형과 주파수를 평가 기준으로 삼아주세요.")
