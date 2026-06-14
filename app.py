@@ -7,7 +7,7 @@ import os
 # 1. 기본 설정 및 API 키 불러오기
 # ==========================================
 # 오타 수정: page_icon 추가 및 쉼표 정리
-st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="🎻", layout="wide")
+st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="", layout="wide")
 
 # API 키는 Streamlit Cloud의 Secrets에서 안전하게 불러옵니다.
 try:
@@ -19,7 +19,7 @@ except KeyError:
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
 # ==========================================
-st.sidebar.title("🎵 해금 학습 메뉴")
+st.sidebar.title(" 해금 학습 메뉴")
 st.sidebar.write("자신의 진도에 맞춰 단계를 선택해주세요.")
 module_stage = st.sidebar.radio(
     "진행할 단계:",
@@ -76,7 +76,7 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
 
 # ----------------- 1단계 -----------------
 if module_stage == "1단계: 조율사 해그미 (준비)":
-    st.title("🎻 1단계: 조율사 해그미")
+    st.title(" 1단계: 조율사 해그미")
     st.info("육자배기토리 시김새 학습을 시작하기 전, 악기 조율과 연주 준비를 해봅시다.")
     
     system_prompt_1 = """
@@ -132,7 +132,7 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
 
 # ----------------- 2단계 -----------------
 elif module_stage == "2단계: 시김새 해그미 (기초)":
-    st.title("🎻 2단계: 시김새 해그미")
+    st.title(" 2단계: 시김새 해그미")
     st.info("떠는 음, 평으로 내는 음 등 기초 시김새를 들어보고 판별하는 단계입니다.")
     
     system_prompt_2 = """
@@ -216,7 +216,7 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
 
 # ----------------- 3단계 -----------------
 elif module_stage == "3단계: 진도아리랑 해그미 (실전)":
-    st.title("🎻 3단계: 진도아리랑 해그미")
+    st.title(" 3단계: 진도아리랑 해그미")
     st.info("실제 연주를 통해 시김새를 전문가의 기준과 비교하며 교정합니다.")
     
     system_prompt_3 = """
