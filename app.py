@@ -90,17 +90,6 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
     st.title("🎵 1단계: 조율사 해그미")
     st.info("육자배기토리 시김새 학습을 시작하기 전, 육자배기토리의 기본음을 정확하게 소리 내 보세요.")
     
-if module_stage == "1단계":
-    st.title("1단계: 조율사 해그미")
-    text = st.text_input("어떤 음인가요?", key="t1")
-    audio, ext = get_audio_input("소리 입력", "1")
-    if st.button("피드백 받기"):
-        if audio: st.write(get_ai_feedback("너는 조율사야", audio, ext, text, ["Yukja_reference_Mi.m4a", "Yukja_reference_La.m4a", "Yukja_reference_Do.m4a"]))
-        else: st.error("소리를 입력하세요.")
-
-
-
-
     system_prompt_1 = """
 [역할 및 목적]
 당신은 중학교 1학년 학생들의 해금 튜닝과 기본음 연습을 돕는 친절하고 전문적인 '해금 조율사'입니다. 학생이 입력한 음원의 주파수(Pitch)를 분석하여, 사전에 학습된 기준 음원(선생님의 미, 라, 도)과 일치하는지 판별하고 피드백을 제공합니다.
@@ -169,15 +158,6 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
     st.title(" 2단계: 시김새 해그미")
     st.info("육자배기토리의 시김새-떠는 음(미), 평으로 내는 음(라), 꺾는 음(도시)-을 해금으로 연습해 보세요.")
     
-elif module_stage == "2단계":
-    st.title("2단계: 시김새 해그미")
-    text = st.text_input("어떤 시김새인가요?", key="t2")
-    audio, ext = get_audio_input("소리 입력", "2")
-    if st.button("피드백 받기"):
-        if audio: st.write(get_ai_feedback("너는 시김새 튜터야", audio, ext, text, ["Yukja_sigimsae_Mi.m4a", "Yukja_sigimsae_La.m4a", "Yukja_sigimsae_Dosi.m4a"]))
-        else: st.error("소리를 입력하세요.")
-
-
     system_prompt_2 = """
 [Role]
 당신은 중학교 학생들의 눈높이에 맞춰 남도 민요의 '육자배기토리' 시김새를 가르치는 친절하고 발랄한 전문 해금 튜터입니다. 학생이 업로드한 오디오를 기준 음원과 비교 분석하여, 기술적 개선 방법과 자신감을 북돋아 주는 격려를 제공합니다. 피드백을 줄 때는 절대 어려운 전문 용어를 쓰지 않고, 친근한 이모티콘과 **별점(최대 5점, ⭐⭐⭐⭐⭐)**을 활용하여 학생이 게임을 하듯 재미있게 연습할 수 있도록 돕습니다. 이모티콘은 바이올린과 같은 서양음악 악기 이모티콘은 삽입하지 않습니다.
@@ -267,15 +247,6 @@ elif module_stage == "3단계: 진도아리랑 해그미 (실전)":
     st.title(" 3단계: 진도아리랑 해그미")
     st.info("육자배기토리의 시김새를 살려 진도아리랑을 해금으로 멋지게 연주해 보세요.")
     
-
-elif module_stage == "3단계":
-    st.title("3단계: 진도아리랑")
-    audio, ext = get_audio_input("진도아리랑 녹음", "3")
-    if st.button("피드백 받기"):
-        if audio: st.write(get_ai_feedback("너는 실전 튜터야", audio, ext, "분석해줘", ["Jindo1-1.m4a", "Jindo2-1.m4a"]))
-        else: st.error("소리를 입력하세요.")
-
-
     system_prompt_3 = """
 [Role]
 당신은 중학교 학생들의 눈높이에 맞춰 남도 민요 '진도아리랑'의 실전 연주를 가르치는 친절하고 발랄한 전문 해금 튜터입니다. 학생이 진도아리랑의 한 대목인 A파트와 B파트를 연주한 오디오를 업로드하면, 기준 음원들과 비교 분석하여 종합적인 피드백과 격려를 제공합니다. 어려운 전문 용어 대신 친근한 이모티콘과 **별점(최대 5점, ⭐⭐⭐⭐⭐)**을 활용하여 학생이 즐겁게 몰입할 수 있도록 돕습니다.
@@ -335,15 +306,6 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
     st.title("🏆 4단계: 성찰 해그미")
     st.info("오늘의 배움을 돌아보고 나만의 '해금 마음 지도'를 완성해보세요!")
     
-
-elif module_stage == "4단계":
-    st.title("4단계: 성찰")
-    reflection = st.text_area("성찰 내용을 적으세요.", key="t4")
-    if st.button("완료"):
-        model = genai.GenerativeModel(model_name=MODEL_NAME)
-        st.write(model.generate_content(str(reflection)).text)
-
-
     system_prompt_4 = """
 1. 역할
 당신은 학생이 학습 과정을 스스로 되돌아보고, 국악의 핵심 원리를 자신의 것으로 내면화하도록 돕는 정교한 교육 설계자이자 따뜻한 해금 튜터 ‘해그미’입니다. 학생이 학습 과정을 돌아볼 수 있는 질문을 던지고, 학생의 답변에서 학습의 어려움과 성취의 순간들을 포착하여 지적인 성장을 자극할 수 있는 질문과 아낌없는 격려를 제공해주세요. 
@@ -407,3 +369,4 @@ elif module_stage == "4단계":
             st.balloons() 
             st.success("성찰 완료!")
             st.write(response.text)
+     
