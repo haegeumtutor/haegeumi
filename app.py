@@ -2,22 +2,23 @@ import streamlit as st
 import google.generativeai as genai
 import tempfile
 import os
-
 # ==========================================
 # 1. 기본 설정 및 API 키 불러오기
 # ==========================================
-st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="🎵", layout="wide")
-
+st.set_page_config(page_title="해그미: AI 해금 튜터", page_icon="", layout="wide")
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 except KeyError:
     st.error("앗! API 키 설정이 빠져있습니다. Streamlit Secrets 설정을 확인해주세요.")
     st.stop()
 
+# 최신 모델 설정
+MODEL_NAME = 'gemini-1.5-pro'
+
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
 # ==========================================
-st.sidebar.title("🎵 해금 학습 메뉴")
+st.sidebar.title(" 해금 학습 메뉴")
 st.sidebar.write("자신의 진도에 맞춰 단계를 선택해주세요.")
 module_stage = st.sidebar.radio(
     "진행할 단계:",
@@ -27,15 +28,13 @@ module_stage = st.sidebar.radio(
         "3단계: 진도아리랑 해그미 (실전)",
         "4단계: 성찰 해그미 (마무리)"
     ]
-)
-
-# ==========================================
+)# ==========================================
 # ⭐ 핵심 공통 함수: 학생 오디오 + 참조 오디오 함께 보내기
 # ==========================================
 def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_message, reference_files=None):
-    model = genai.GenerativeModel(model_name='gemini-3.1-flash-image', system_instruction=system_prompt)
+   model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt)
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
+   with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
         tmp_file.write(audio_file_bytes)
         tmp_file_path = tmp_file.name
         
@@ -60,7 +59,6 @@ def get_ai_feedback(system_prompt, audio_file_bytes, file_extension, user_messag
     response = model.generate_content(contents)
     os.remove(tmp_file_path)
     return response.text
-
 # 🎤 스트림릿 최신형 '기본 내장 녹음기' 적용 UI
 def get_audio_input(label):
     st.write(label)
@@ -84,11 +82,9 @@ def get_audio_input(label):
             file_ext = uploaded_file.name.split('.')[-1]
             
     return audio_bytes, file_ext
-
 # ==========================================
 # 3. 각 단계별 화면 및 프롬프트 설정
 # ==========================================
-
 # ----------------- 1단계 -----------------
 if module_stage == "1단계: 조율사 해그미 (준비)":
     st.title("🎵 1단계: 조율사 해그미")
@@ -157,10 +153,9 @@ if module_stage == "1단계: 조율사 해그미 (준비)":
             result = get_ai_feedback(system_prompt_1, audio_bytes, file_ext, message, reference_files=ref_files_1)
             st.success("분석 완료!")
             st.write(result)
-
 # ----------------- 2단계 -----------------
 elif module_stage == "2단계: 시김새 해그미 (기초)":
-    st.title("🎵 2단계: 시김새 해그미")
+    st.title(" 2단계: 시김새 해그미")
     st.info("육자배기토리의 시김새-떠는 음(미), 평으로 내는 음(라), 꺾는 음(도시)-을 해금으로 연습해 보세요.")
     
     system_prompt_2 = """
@@ -247,10 +242,9 @@ elif module_stage == "2단계: 시김새 해그미 (기초)":
             result = get_ai_feedback(system_prompt_2, audio_bytes, file_ext, message, reference_files=ref_files_2)
             st.success("분석 완료!")
             st.write(result)
-
 # ----------------- 3단계 -----------------
 elif module_stage == "3단계: 진도아리랑 해그미 (실전)":
-    st.title("🎵 3단계: 진도아리랑 해그미")
+    st.title(" 3단계: 진도아리랑 해그미")
     st.info("육자배기토리의 시김새를 살려 진도아리랑을 해금으로 멋지게 연주해 보세요.")
     
     system_prompt_3 = """
@@ -307,7 +301,6 @@ AB파트-아(떠는 음) 리(평 음) 아(떠는 음) 리(평 음) 랑(평음)
             result = get_ai_feedback(system_prompt_3, audio_bytes, file_ext, "내 연주에서 시김새가 전문가 기준에 맞게 잘 표현되었는지 피드백해줘.", reference_files=ref_files_3)
             st.success("분석 완료!")
             st.write(result)
-
 # ----------------- 4단계 -----------------
 elif module_stage == "4단계: 성찰 해그미 (마무리)":
     st.title("🏆 4단계: 성찰 해그미")
@@ -369,10 +362,12 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
     
     user_reflection = st.text_area("오늘 연습하면서 가장 어려웠던 부분이나 새롭게 깨달은 점을 자유롭게 적어주세요.", height=150)
     
-    if user_reflection and st.button("마음 지도 및 뱃지 받기"):
+ if user_reflection and st.button("마음 지도 및 뱃지 받기"):
         with st.spinner("해그미가 학생의 성찰을 읽고 마음 지도를 그리고 있습니다..."):
-            model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt_4)
+            # 수정된 부분: 'gemini-1.5-flash' 대신 MODEL_NAME 사용
+            model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt_4)
             response = model.generate_content(user_reflection)
             st.balloons() 
             st.success("성찰 완료!")
             st.write(response.text)
+     
