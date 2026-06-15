@@ -385,12 +385,21 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 "포기하지 않고 끝까지 자신의 소리에 귀 기울인 당신이 최고입니다!"
     """
     
-    user_reflection = st.text_area("오늘 연습하면서 가장 어려웠던 부분이나 새롭게 깨달은 점을 자유롭게 적어주세요.", height=150)
-    
-    if user_reflection and st.button("마음 지도 및 뱃지 받기"):
+   # 스마트폰에서도 터치 한 번으로 전송되도록 Form(폼) 구조 적용
+    with st.form(key="reflection_form"):
+        user_reflection = st.text_area("오늘 연습하면서 가장 어려웠던 부분이나 새롭게 깨달은 점을 자유롭게 적어주세요.", height=150)
+        # 폼 내부의 전용 제출 버튼
+        submit_button = st.form_submit_button(label="마음 지도 및 뱃지 받기")
+
+    # 버튼이 눌렸고, 내용이 있을 때만 실행
+    if submit_button and user_reflection:
         with st.spinner("해그미가 학생의 성찰을 읽고 마음 지도를 그리고 있습니다..."):
             model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt_4)
             response = model.generate_content(user_reflection)
             st.balloons() 
             st.success("성찰 완료!")
             st.write(response.text)
+            
+    # 내용 없이 버튼만 눌렀을 때의 안내 메시지
+    elif submit_button and not user_reflection:
+        st.warning("앗! 내용이 비어있어요. 오늘 배운 점을 조금이라도 적어주세요! 😊")
