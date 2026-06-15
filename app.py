@@ -338,17 +338,13 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 2. 작동 지침 및 피드백 출력 방식 
 -학생이 ‘안녕’을 입력하면, 간단한 인사말과 첫 번째 질문을 제시하세요.   
 학생이 연습 소감을 입력하면 다음 순서로 반응하세요.
-첫 번째 질문 - 학생 답- 학생 답에 대한 피드백- 두 번째 질문- 학생 답- 학생 답에 대한 피드백 순서로 대화합니다. 
-총 2개의 질문 후에 피드백을 주면서 피드백과 함께 학생의 대답을 토대로 한 마음지도와 뱃지를 시각화해서 제공해주세요 
-순서대로 진행해 주세요. 
-바이올린 이모티콘은 제공하지 않습니다. 
+첫 번째 질문 - 학생 답- 학생 답에 대한 피드백- 두 번째 질문- 학생 답- 학생 답에 대한 피드백... 이 순서로 마지막 질문까지 이어가며 대화하세요. 
+마지막 질문 후, 학생이 답을 하면, 해금 마음 지도와 성장 뱃지를 수여합니다. 
+순서대로 진행해 주세요.  
   
 1) 첫 번째 질문
--오늘 연습하면서 나 스스로에게 가장 칭찬해주고 싶은 부분은 어디인가요?
--오늘 배운 해금 소리를 색깔로 표현한다면 무슨 색일까요? 그 이유는요? 
--만약 친구가 해금을 어려워한다면, 오늘 배운 꿀팁 중 어떤 걸 알려주고 싶어요? -학생이 답을 하면, 스스로의 학습 과정을 성찰하고 다양한 생각과 의견을 말해준 것에 대해 칭찬해 주세요. 
--학생들이 자신의 연습 과정을 모니터링하고 평가하게 합니다. (예: "어떤 부분이 잘 안 되었고, 왜 그렇게 생각하는지?")
--다음 학습을 위한 전략을 스스로 세우도록 유도합니다. (예: "다음에 연습한다면 어디에 집중하고 싶나요?")
+-오늘의 해금 연습 소감에 대해 이야기해 주세요. 
+-학생이 답을 하면 칭찬과 격려, 공감의 피드백을 제공해주세요. 
   
 2) 두 번째 질문 
 -오늘 연습한 세 가지 시김새(떠는 음, 평음, 꺾는 음) 중에서, 육자배기토리의 느낌을 살리는 데 가장 중요하다고 생각한 시김새는 무엇이었나요? 
@@ -358,7 +354,21 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 -학생들이 '육자배기토리'의 음악적 특징(떠는 음, 평음, 꺾는 음)이라는 핵심 개념을 잊지 않도록 돕습니다.
 -단순히 "잘했다"가 아니라, "어떤 음의 특징을 살리려 노력했는지" 구체적인 음악용어를 사용하여 대화합니다.
   
-3) 두 번째 질문의 피드맥과 함께 학생의 성찰 깊이에 따라 '해금 마음 지도'를 시각화하여 보여줍니다.
+3) 세 번째 질문 
+-대화를 이어가며 스스로 생각을 정리할 수 있도록, 다음 중 하나의 질문을 선택해 부드럽게 던져주세요. 
+-오늘 연습하면서 나 스스로에게 가장 칭찬해주고 싶은 부분은 어디인가요?
+-오늘 배운 해금 소리를 색깔로 표현한다면 무슨 색일까요? 그 이유는요? 
+-만약 친구가 해금을 어려워한다면, 오늘 배운 꿀팁 중 어떤 걸 알려주고 싶어요? -학생이 답을 하면, 스스로의 학습 과정을 성찰하고 다양한 생각과 의견을 말해준 것에 대해 칭찬해 주세요. 
+-학생들이 자신의 연습 과정을 모니터링하고 평가하게 합니다. (예: "어떤 부분이 잘 안 되었고, 왜 그렇게 생각하는지?")
+-다음 학습을 위한 전략을 스스로 세우도록 유도합니다. (예: "다음에 연습한다면 어디에 집중하고 싶나요?")
+  
+4) 마지막 질문 
+-오늘 배운 이 시김새의 원리를 나중에 다른 곡을 연주할 때도 적용할 수 있을까요?  
+-학생이 답을 하면, 다양한 생각과 의견을 말해준 것에 대해 칭찬과 격려를 해 주세요. 
+  
+3. 시각적 데이터 출력 방식 
+  
+마지막 질문 후에는 학생의 성찰 깊이에 따라 '해금 마음 지도'를 시각화하여 보여줍니다.
   
 [출력 양식 예시] 
 오늘 나의 해금 마음 지도
@@ -375,20 +385,51 @@ elif module_stage == "4단계: 성찰 해그미 (마무리)":
 "포기하지 않고 끝까지 자신의 소리에 귀 기울인 당신이 최고입니다!"
     """
     
-   # 스마트폰에서도 터치 한 번으로 전송되도록 Form(폼) 구조 적용
-    with st.form(key="reflection_form"):
-        user_reflection = st.text_area("오늘 연습하면서 가장 어려웠던 부분이나 새롭게 깨달은 점을 자유롭게 적어주세요.", height=150)
-        # 폼 내부의 전용 제출 버튼
-        submit_button = st.form_submit_button(label="마음 지도 및 뱃지 받기")
+    # 1. 기억 공간(Session State) 초기화
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+        
+    # 2. 다음 학생을 위한 '대화 초기화' 버튼 (새로고침 기능)
+    if st.button("🔄 새로운 성찰 시작하기 (대화 초기화)"):
+        st.session_state.chat_history = []
+        st.rerun()
 
-    # 버튼이 눌렸고, 내용이 있을 때만 실행
-    if submit_button and user_reflection:
-        with st.spinner("해그미가 학생의 성찰을 읽고 마음 지도를 그리고 있습니다..."):
-            model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt_4)
-            response = model.generate_content(user_reflection)
-            st.balloons() 
-            st.success("성찰 완료!")
-            st.write(response.text)
+    # 3. 이전 대화 내역을 카카오톡처럼 화면에 쭉 뿌려주기
+    for message in st.session_state.chat_history:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # 4. 스마트폰 최적화 채팅 입력창 (엔터키/전송버튼 호환)
+    if prompt := st.chat_input("해그미에게 메시지를 보내주세요 (처음엔 '안녕'이라고 인사해볼까요?)"):
+        
+        # 학생이 보낸 메시지 화면에 표시 & 기억 공간에 저장
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+
+        # 해그미의 답변 턴
+        with st.chat_message("assistant"):
+            with st.spinner("해그미가 답변을 생각하고 있습니다..."):
+                model = genai.GenerativeModel(model_name=MODEL_NAME, system_instruction=system_prompt_4)
+                
+                # 지금까지의 대화 기록을 Gemini가 이해할 수 있는 형태로 변환
+                gemini_history = []
+                for msg in st.session_state.chat_history[:-1]:
+                    role = "user" if msg["role"] == "user" else "model"
+                    gemini_history.append({"role": role, "parts": [msg["content"]]})
+                    
+                # 과거 기억을 들고 연속 대화(Chat) 시작
+                chat = model.start_chat(history=gemini_history)
+                response = chat.send_message(prompt)
+                
+                st.markdown(response.text)
+                
+                # 마지막에 '뱃지'나 '마음 지도'라는 단어가 등장하면 풍선 축하 효과!
+                if "뱃지" in response.text or "마음 지도" in response.text:
+                    st.balloons()
+                    
+        # 해그미의 답변도 기억 공간에 저장
+        st.session_state.chat_history.append({"role": "assistant", "content": response.text})
             
     # 내용 없이 버튼만 눌렀을 때의 안내 메시지
     elif submit_button and not user_reflection:
