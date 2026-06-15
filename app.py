@@ -20,7 +20,7 @@ MODEL_NAME = 'gemini-3.5-flash'
 # ==========================================
 # 2. 화면 왼쪽 사이드바 (단계 선택 메뉴)
 # ==========================================
-st.sidebar.title("🎵 해금 학습 메뉴")
+st.sidebar.title("해금 학습 메뉴")
 st.sidebar.write("자신의 진도에 맞춰 단계를 선택해주세요.")
 module_stage = st.sidebar.radio(
     "진행할 단계:",
@@ -109,7 +109,7 @@ def get_audio_input(label):
 
 # ----------------- 1단계 -----------------
 if module_stage == "1단계: 조율사 해그미 (준비)":
-    st.title("🎵 1단계: 조율사 해그미")
+    st.title("1단계: 조율사 해그미")
     st.info("육자배기토리 시김새 학습을 시작하기 전, 육자배기토리의 기본음을 정확하게 소리 내 보세요.")
     
     system_prompt_1 = """
@@ -344,10 +344,10 @@ AB파트-아(떠는 음) 리(평 음) 아(떠는 음) 리(평 음) 랑(평음)
     # ✨ 3단계: 진도아리랑 대표 기준 음원 미리 듣기
     st.write("### 🎧 진도아리랑 모범 연주 들어보기")
     with st.expander("👇 여기를 눌러서 시범 연주를 확인하세요"):
-        st.write("🎵 진도아리랑 **A파트 (모범 연주)**")
+        st.write("진도아리랑 **A파트 (모범 연주)**")
         if os.path.exists("Jindo1-1.m4a"): st.audio("Jindo1-1.m4a")
         
-        st.write("🎵 진도아리랑 **B파트 (모범 연주)**")
+        st.write("진도아리랑 **B파트 (모범 연주)**")
         if os.path.exists("Jindo2-1.m4a"): st.audio("Jindo2-1.m4a")
     st.markdown("---")
     
